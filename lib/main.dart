@@ -11,8 +11,11 @@ import 'package:pay/core/presentation/screens/login/authenticated_navigation.dar
 import 'package:pay/core/presentation/screens/login/login_bloc.dart';
 import 'package:pay/core/presentation/screens/login/login_screen.dart';
 import 'package:pay/config/env.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Adicione esta linha
+
   final apiProvider = ApiProvider(AppConfig.apiBaseUrl);
   final loginRepository = AuthRepository(apiProvider);
   final loginUseCase = LoginUseCase(loginRepository);
@@ -22,32 +25,59 @@ void main() {
   final bankAccountRepository =
       BankAccountRepository(provider: bankAccountProvider);
   final bankAccountUseCase = BankAccountUseCase(bankAccountRepository);
+  final bankAccountBloc = BankAccountBloc(bankAccountUseCase);
+  final isTokenValid = await checkTokenValidity();
 
-  runApp(MyApp(loginBloc: loginBloc, bankAccountUseCase: bankAccountUseCase));
+  runApp(MyApp(
+    loginBloc: loginBloc,
+    bankAccountBloc: bankAccountBloc,
+    initialRoute: isTokenValid ? '/home' : '/',
+  ));
+}
+
+Future<bool> checkTokenValidity() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final expirationDateStr = prefs.getString('expirationDate');
+
+  if (token == null || expirationDateStr == null) {
+    return false;
+  }
+
+  final expirationDate = DateTime.parse(expirationDateStr);
+  if (DateTime.now().isAfter(expirationDate)) {
+    return false;
+  }
+
+  return true;
 }
 
 class MyApp extends StatelessWidget {
   final LoginBloc loginBloc;
-  final BankAccountUseCase bankAccountUseCase;
+  final BankAccountBloc bankAccountBloc;
 
-  const MyApp(
-      {Key? key, required this.loginBloc, required this.bankAccountUseCase})
-      : super(key: key);
+  final String initialRoute;
+  const MyApp({
+    super.key,
+    required this.loginBloc,
+    required this.bankAccountBloc,
+    required this.initialRoute,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider<LoginBloc>(create: (_) => loginBloc),
-        BlocProvider<BankAccountBloc>(
-            create: (_) => BankAccountBloc(bankAccountUseCase)),
+        BlocProvider<BankAccountBloc>(create: (_) => bankAccountBloc),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Minimal Dashboard',
         theme: ThemeData(primarySwatch: Colors.blue),
-        home: const LoginScreen(),
+        initialRoute: initialRoute,
         routes: {
+          '/': (context) => const LoginScreen(),
           '/home': (context) => const AuthenticatedNavigation(),
         },
       ),
