@@ -15,7 +15,10 @@ class LoginUseCase {
     await prefs.setString('refreshToken', response.refreshToken);
     await prefs.setString(
         'expirationDate', response.expirationDate.toIso8601String());
-
+    final mainTenant = response.userData.tenants
+        .firstWhere((tenant) => tenant.userIsMain == true);
+    await prefs.setString('pk', response.userData.pk);
+    await prefs.setString('tenant_id', mainTenant.tenantId);
     return AuthEntity(
       token: response.token,
       refreshToken: response.refreshToken,

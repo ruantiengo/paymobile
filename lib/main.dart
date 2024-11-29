@@ -14,7 +14,7 @@ import 'package:pay/config/env.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Adicione esta linha
+  WidgetsFlutterBinding.ensureInitialized();
 
   final apiProvider = ApiProvider(AppConfig.apiBaseUrl);
   final loginRepository = AuthRepository(apiProvider);

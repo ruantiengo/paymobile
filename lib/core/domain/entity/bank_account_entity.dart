@@ -3,13 +3,13 @@ class BankAccount {
   final String tenantId;
   final String name;
   final String documentNumber;
-  final String? walletNumber;
+  final int? walletNumber;
   final int convenantCode;
   final String agency;
   final int accountNumber;
   final int accountDigit;
   final String pixDictKey;
-  final String pixDictKeyType;
+  final String? pixDictKeyType;
   final String bank;
   final String createdBy;
   final DateTime createdAt;
@@ -27,7 +27,7 @@ class BankAccount {
     required this.accountNumber,
     required this.accountDigit,
     required this.pixDictKey,
-    required this.pixDictKeyType,
+    this.pixDictKeyType,
     required this.bank,
     required this.createdBy,
     required this.createdAt,

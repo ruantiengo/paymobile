@@ -29,6 +29,7 @@ class UserDataModel {
   final String username;
   final String name;
   final String mainTenant;
+  final String pk;
   final List<TenantModel> tenants;
 
   UserDataModel({
@@ -37,6 +38,7 @@ class UserDataModel {
     required this.name,
     required this.mainTenant,
     required this.tenants,
+    required this.pk,
   });
 
   factory UserDataModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +50,7 @@ class UserDataModel {
       tenants: (json['tenants'] as List)
           .map((tenant) => TenantModel.fromJson(tenant))
           .toList(),
+      pk: json['pk'],
     );
   }
 }

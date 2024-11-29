@@ -9,6 +9,7 @@ class BankAccountRepository {
 
   Future<List<BankAccount>> getBankAccounts() async {
     final bankAccountModels = await _provider.getBankAccounts();
+
     return bankAccountModels;
   }
 }
