@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:pay/core/presentation/screens/bank_account/bank_account_screen.dart';
-import 'package:pay/core/presentation/screens/bills/bills_screen.dart';
+import 'package:pay/core/presentation/screens/bills/bank_slip_bloc.dart';
+import 'package:pay/core/presentation/screens/bills/bank_slip_event.dart';
+import 'package:pay/core/presentation/screens/bills/bank_slip_screen.dart';
 import 'package:pay/core/presentation/screens/home/home_screen.dart';
 import 'package:pay/core/presentation/settings/settings_screen.dart';
-import 'package:pay/core/presentation/screens/bank_account/bank_account_block.dart';
+import 'package:pay/core/presentation/screens/bank_account/bank_account_bloc.dart';
 import 'package:pay/core/presentation/screens/bank_account/bank_account_event.dart';
 
 class AuthenticatedNavigation extends StatefulWidget {
@@ -17,10 +20,11 @@ class AuthenticatedNavigation extends StatefulWidget {
 
 class _AuthenticatedNavigationState extends State<AuthenticatedNavigation> {
   int _selectedIndex = 0;
+  bool _hasLoadedBankAccounts = false;
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const BillsScreen(),
+    const BankSlipScreen(),
     const BankAccountScreen(),
     const SettingsScreen(),
   ];
@@ -30,9 +34,12 @@ class _AuthenticatedNavigationState extends State<AuthenticatedNavigation> {
       _selectedIndex = index;
     });
 
-    if (index == 2) {
-      // Disparar o evento de carregamento das contas bancárias
+    if (index == 1) {
+      context.read<BankSlipBloc>().add(LoadBankSlips());
+    }
+    if (index == 2 && !_hasLoadedBankAccounts) {
       context.read<BankAccountBloc>().add(LoadBankAccounts());
+      _hasLoadedBankAccounts = true;
     }
   }
 

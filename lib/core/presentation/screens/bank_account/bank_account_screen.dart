@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pay/core/presentation/screens/bank_account/bank_account_block.dart';
+import 'package:pay/core/presentation/screens/bank_account/bank_account_bloc.dart';
 import 'package:pay/core/presentation/screens/bank_account/bank_account_event.dart';
 import 'package:pay/core/presentation/screens/bank_account/bank_account_state.dart';
 
@@ -12,6 +12,7 @@ class BankAccountScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue.shade900,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Container(
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
@@ -29,7 +30,7 @@ class BankAccountScreen extends StatelessWidget {
             label: const Text('Nova Conta Bancária',
                 style: TextStyle(color: Colors.white)),
             onPressed: () {
-              // Implement new bank account navigation
+              context.read<BankAccountBloc>().add(LoadBankAccounts());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue.shade700,
@@ -68,17 +69,10 @@ class BankAccountScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 DropdownButton<String>(
-                  hint: const Text('Agência',
-                      style: TextStyle(color: Colors.blue)),
-                  items: const [
-                    DropdownMenuItem(
-                        value: '',
-                        child: Text('Todas',
-                            style: TextStyle(color: Colors.blue))),
-                  ],
-                  onChanged: (value) {
-                    // Implement filter logic
-                  },
+                  hint:
+                      const Text('Nome', style: TextStyle(color: Colors.blue)),
+                  items: const [],
+                  onChanged: (value) {},
                 ),
               ],
             ),
@@ -92,49 +86,53 @@ class BankAccountScreen extends StatelessWidget {
 
                 if (state is BankAccountError) {
                   return Center(
-                      child:
-                          Text('Error', style: TextStyle(color: Colors.red)));
+                      child: Text('Erro', style: TextStyle(color: Colors.red)));
                 }
 
                 if (state is BankAccountLoaded) {
-                  return ListView.builder(
-                    itemCount: state.accounts.length,
-                    itemBuilder: (context, index) {
-                      final account = state.accounts[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 8, horizontal: 16),
-                        child: ListTile(
-                          title: Text(
-                            account.name,
-                            style: TextStyle(color: Colors.blue.shade900),
-                          ),
-                          subtitle: Text(
-                            'Banco: ${account.bank}\nConta: ${account.accountNumber}-${account.accountDigit}\nAgência: ${account.agency}',
-                            style: TextStyle(color: Colors.blue.shade700),
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                color: Colors.blue,
-                                onPressed: () {
-                                  // Implement edit action
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.copy),
-                                color: Colors.blue,
-                                onPressed: () {
-                                  // Implement copy action
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<BankAccountBloc>().add(LoadBankAccounts());
                     },
+                    child: ListView.builder(
+                      itemCount: state.accounts.length,
+                      itemBuilder: (context, index) {
+                        final account = state.accounts[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 16),
+                          child: ListTile(
+                            title: Text(
+                              account.name,
+                              style: TextStyle(color: Colors.blue.shade900),
+                            ),
+                            subtitle: Text(
+                              'Banco: ${account.bank}\nConta: ${account.accountNumber}-${account.accountDigit}\nAgência: ${account.agency}',
+                              style: TextStyle(color: Colors.blue.shade700),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  color: Colors.blue,
+                                  onPressed: () {
+                                    // Implement edit action
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.copy),
+                                  color: Colors.blue,
+                                  onPressed: () {
+                                    // Implement copy action
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   );
                 }
 

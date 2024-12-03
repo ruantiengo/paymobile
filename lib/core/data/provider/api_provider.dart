@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiProvider {
   final String baseUrl;
@@ -8,9 +9,17 @@ class ApiProvider {
 
   Future<Map<String, dynamic>> post(
       String endpoint, Map<String, dynamic> body) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final pk = prefs.getString('pk');
+
     final response = await http.post(
       Uri.parse('$baseUrl$endpoint'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Token': '$token',
+        'X-api-key': '$pk',
+      },
       body: jsonEncode(body),
     );
 
@@ -24,9 +33,17 @@ class ApiProvider {
 
   Future<Map<String, dynamic>> get(String endpoint,
       {Map<String, String>? headers}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final pk = prefs.getString('pk');
+
     final response = await http.get(
       Uri.parse('$baseUrl$endpoint'),
-      headers: headers ?? {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Token': '$token',
+        'X-api-key': '$pk',
+      },
     );
 
     if (response.statusCode == 200) {

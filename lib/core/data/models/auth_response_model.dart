@@ -22,6 +22,16 @@ class AuthResponseModel {
       userData: UserDataModel.fromJson(json['data']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'token': token,
+      'accessToken': accessToken,
+      'refreshToken': refreshToken,
+      'expirationDate': expirationDate.toIso8601String(),
+      'data': userData.toJson(),
+    };
+  }
 }
 
 class UserDataModel {
@@ -52,6 +62,17 @@ class UserDataModel {
           .toList(),
       pk: json['pk'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'user_id': userId,
+      'username': username,
+      'name': name,
+      'mainTenant': mainTenant,
+      'tenants': tenants.map((tenant) => tenant.toJson()).toList(),
+      'pk': pk,
+    };
   }
 }
 
@@ -84,5 +105,17 @@ class TenantModel {
       enabled: json['enabled'],
       userIsMain: json['userIsMain'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'tenantId': tenantId,
+      'name': name,
+      'pk': pk,
+      'description': description,
+      'created_at': createdAt.toIso8601String(),
+      'enabled': enabled,
+      'userIsMain': userIsMain,
+    };
   }
 }

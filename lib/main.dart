@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pay/core/data/provider/api_provider.dart';
 import 'package:pay/core/data/provider/bank_account_provider.dart';
+import 'package:pay/core/data/provider/bank_slip_provider.dart';
 import 'package:pay/core/data/repository/auth_repository.dart';
 import 'package:pay/core/data/repository/bank_account_repository.dart';
+import 'package:pay/core/data/repository/bank_slip_repository.dart';
 import 'package:pay/core/domain/usecase/bank_account_usecase.dart';
+import 'package:pay/core/domain/usecase/bank_slip_usecase.dart';
 import 'package:pay/core/domain/usecase/login_usecase.dart';
-import 'package:pay/core/presentation/screens/bank_account/bank_account_block.dart';
+import 'package:pay/core/presentation/screens/bank_account/bank_account_bloc.dart';
+import 'package:pay/core/presentation/screens/bills/bank_slip_bloc.dart';
 import 'package:pay/core/presentation/screens/login/authenticated_navigation.dart';
 import 'package:pay/core/presentation/screens/login/login_bloc.dart';
 import 'package:pay/core/presentation/screens/login/login_screen.dart';
@@ -26,11 +30,17 @@ void main() async {
       BankAccountRepository(provider: bankAccountProvider);
   final bankAccountUseCase = BankAccountUseCase(bankAccountRepository);
   final bankAccountBloc = BankAccountBloc(bankAccountUseCase);
+
+  final bankSlipProvider = BankSlipProvider();
+  final bankSlipRepository = BankSlipRepository(provider: bankSlipProvider);
+  final bankSlipUseCase = BankSlipUseCase(bankSlipRepository);
+  final bankSlipBloc = BankSlipBloc(bankSlipUseCase);
   final isTokenValid = await checkTokenValidity();
 
   runApp(MyApp(
     loginBloc: loginBloc,
     bankAccountBloc: bankAccountBloc,
+    bankSlipBloc: bankSlipBloc,
     initialRoute: isTokenValid ? '/home' : '/',
   ));
 }
@@ -55,6 +65,7 @@ Future<bool> checkTokenValidity() async {
 class MyApp extends StatelessWidget {
   final LoginBloc loginBloc;
   final BankAccountBloc bankAccountBloc;
+  final BankSlipBloc bankSlipBloc;
 
   final String initialRoute;
   const MyApp({
@@ -62,6 +73,7 @@ class MyApp extends StatelessWidget {
     required this.loginBloc,
     required this.bankAccountBloc,
     required this.initialRoute,
+    required this.bankSlipBloc,
   });
 
   @override
@@ -70,10 +82,11 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider<LoginBloc>(create: (_) => loginBloc),
         BlocProvider<BankAccountBloc>(create: (_) => bankAccountBloc),
+        BlocProvider<BankSlipBloc>(create: (_) => bankSlipBloc),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Minimal Dashboard',
+        title: '4pay',
         theme: ThemeData(primarySwatch: Colors.blue),
         initialRoute: initialRoute,
         routes: {
