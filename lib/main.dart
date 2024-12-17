@@ -9,16 +9,25 @@ import 'package:pay/core/data/repository/bank_slip_repository.dart';
 import 'package:pay/core/domain/usecase/bank_account_usecase.dart';
 import 'package:pay/core/domain/usecase/bank_slip_usecase.dart';
 import 'package:pay/core/domain/usecase/login_usecase.dart';
+import 'package:pay/core/domain/usecase/statistics_usecase.dart';
 import 'package:pay/core/presentation/screens/bank_account/bank_account_bloc.dart';
 import 'package:pay/core/presentation/screens/bills/bank_slip_bloc.dart';
+import 'package:pay/core/presentation/screens/home/home_bloc.dart';
 import 'package:pay/core/presentation/screens/login/authenticated_navigation.dart';
 import 'package:pay/core/presentation/screens/login/login_bloc.dart';
 import 'package:pay/core/presentation/screens/login/login_screen.dart';
 import 'package:pay/config/env.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+import './utils/colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: backgroundColor, // A cor desejada do seu app
+    systemNavigationBarIconBrightness: Brightness.light,
+  ));
 
   final apiProvider = ApiProvider(AppConfig.apiBaseUrl);
   final loginRepository = AuthRepository(apiProvider);
@@ -37,10 +46,14 @@ void main() async {
   final bankSlipBloc = BankSlipBloc(bankSlipUseCase);
   final isTokenValid = await checkTokenValidity();
 
+  final statsUsecase = StatisticsUsecase(bankSlipRepository);
+  final statisticBloc = StatisticBloc(statsUsecase);
+
   runApp(MyApp(
     loginBloc: loginBloc,
     bankAccountBloc: bankAccountBloc,
     bankSlipBloc: bankSlipBloc,
+    statisticBloc: statisticBloc,
     initialRoute: isTokenValid ? '/home' : '/',
   ));
 }
@@ -66,7 +79,7 @@ class MyApp extends StatelessWidget {
   final LoginBloc loginBloc;
   final BankAccountBloc bankAccountBloc;
   final BankSlipBloc bankSlipBloc;
-
+  final StatisticBloc statisticBloc;
   final String initialRoute;
   const MyApp({
     super.key,
@@ -74,6 +87,7 @@ class MyApp extends StatelessWidget {
     required this.bankAccountBloc,
     required this.initialRoute,
     required this.bankSlipBloc,
+    required this.statisticBloc,
   });
 
   @override
@@ -83,6 +97,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<LoginBloc>(create: (_) => loginBloc),
         BlocProvider<BankAccountBloc>(create: (_) => bankAccountBloc),
         BlocProvider<BankSlipBloc>(create: (_) => bankSlipBloc),
+        BlocProvider<StatisticBloc>(create: (_) => statisticBloc),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

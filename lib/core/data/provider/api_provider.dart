@@ -36,6 +36,7 @@ class ApiProvider {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     final pk = prefs.getString('pk');
+    final tenantid = prefs.getString('tenant_id');
 
     final response = await http.get(
       Uri.parse('$baseUrl$endpoint'),
@@ -43,6 +44,8 @@ class ApiProvider {
         'Content-Type': 'application/json',
         'Token': '$token',
         'X-api-key': '$pk',
+        'tenantid': '$tenantid',
+        ...?headers,
       },
     );
 

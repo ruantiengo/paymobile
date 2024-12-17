@@ -25,19 +25,19 @@ class BankAccountScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          ElevatedButton.icon(
-            icon: const Icon(Icons.add, color: Colors.white),
-            label: const Text('Nova Conta Bancária',
-                style: TextStyle(color: Colors.white)),
-            onPressed: () {
-              context.read<BankAccountBloc>().add(LoadBankAccounts());
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade700,
-              foregroundColor: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 16),
+          // ElevatedButton.icon(
+          //   icon: const Icon(Icons.add, color: Colors.white),
+          //   label: const Text('Nova Conta Bancária',
+          //       style: TextStyle(color: Colors.white)),
+          //   onPressed: () {
+          //     context.read<BankAccountBloc>().add(LoadBankAccounts());
+          //   },
+          //   style: ElevatedButton.styleFrom(
+          //     backgroundColor: Colors.blue.shade700,
+          //     foregroundColor: Colors.white,
+          //   ),
+          // ),
+          // const SizedBox(width: 16),
         ],
       ),
       body: Column(
@@ -109,25 +109,6 @@ class BankAccountScreen extends StatelessWidget {
                             subtitle: Text(
                               'Banco: ${account.bank}\nConta: ${account.accountNumber}-${account.accountDigit}\nAgência: ${account.agency}',
                               style: TextStyle(color: Colors.blue.shade700),
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  color: Colors.blue,
-                                  onPressed: () {
-                                    // Implement edit action
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.copy),
-                                  color: Colors.blue,
-                                  onPressed: () {
-                                    // Implement copy action
-                                  },
-                                ),
-                              ],
                             ),
                           ),
                         );

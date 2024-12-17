@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pay/core/presentation/screens/bills/bank_slip_bloc.dart';
 import 'package:pay/core/presentation/screens/bills/bank_slip_event.dart';
 import 'package:pay/core/presentation/screens/bills/bank_slip_state.dart';
+import 'package:pay/utils/colors.dart';
 
 class BankSlipScreen extends StatelessWidget {
   const BankSlipScreen({Key? key}) : super(key: key);
@@ -16,7 +17,7 @@ class BankSlipScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: backgroundColor,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Container(
           padding: const EdgeInsets.all(8.0),
@@ -60,28 +61,8 @@ class BankSlipScreen extends StatelessWidget {
                 DropdownButton<String>(
                   hint:
                       const Text('Erpid', style: TextStyle(color: Colors.blue)),
-                  items: const [
-                    // DropdownMenuItem(
-                    //   value: 'pending',
-                    //   child: Text('Pendentes',
-                    //       style: TextStyle(color: Colors.blue)),
-                    // ),
-                    // DropdownMenuItem(
-                    //   value: 'paid',
-                    //   child:
-                    //       Text('Pagos', style: TextStyle(color: Colors.blue)),
-                    // ),
-                    // DropdownMenuItem(
-                    //   value: '',
-                    //   child:
-                    //       Text('Todos', style: TextStyle(color: Colors.blue)),
-                    // ),
-                  ],
-                  onChanged: (value) {
-                    // context
-                    //     .read<BankSlipBloc>()
-                    //     .add(FilterBankSlipsByStatus(value!));
-                  },
+                  items: const [],
+                  onChanged: (value) {},
                 ),
               ],
             ),
@@ -105,8 +86,13 @@ class BankSlipScreen extends StatelessWidget {
                       context.read<BankSlipBloc>().add(LoadBankSlips());
                     },
                     child: ListView.builder(
-                      itemCount: state.bankSlips.length,
+                      itemCount:
+                          state.bankSlips.length + 1, // +1 para o SizedBox
                       itemBuilder: (context, index) {
+                        if (index == state.bankSlips.length) {
+                          // Adiciona um espaço extra ao final da lista
+                          return const SizedBox(height: 100);
+                        }
                         final bankSlip = state.bankSlips[index];
                         return Container(
                           margin: const EdgeInsets.symmetric(
@@ -130,22 +116,31 @@ class BankSlipScreen extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Boleto: ${bankSlip.erpId}',
+                                  'ID: ${bankSlip.erpId}',
                                   style: TextStyle(
                                     color: Colors.blue.shade900,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text(
+                                Icon(
                                   bankSlip.status == "pending"
-                                      ? "Pendente"
-                                      : "Pago",
-                                  style: TextStyle(
-                                    color: bankSlip.status == "pending"
-                                        ? Colors.orange
-                                        : Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                      ? Icons.hourglass_empty
+                                      : bankSlip.status == "paid"
+                                          ? Icons.check_circle
+                                          : bankSlip.status == "cancelled"
+                                              ? Icons.cancel
+                                              : bankSlip.status == "expired"
+                                                  ? Icons.error
+                                                  : Icons.error_outline,
+                                  color: bankSlip.status == "pending"
+                                      ? Colors.orange
+                                      : bankSlip.status == "paid"
+                                          ? Colors.green
+                                          : bankSlip.status == "cancelled"
+                                              ? Colors.red
+                                              : bankSlip.status == "expired"
+                                                  ? Colors.grey
+                                                  : Colors.red,
                                 ),
                               ],
                             ),
@@ -162,7 +157,7 @@ class BankSlipScreen extends StatelessWidget {
                                   style: TextStyle(color: Colors.grey.shade700),
                                 ),
                                 Text(
-                                  'Conta: ${bankSlip.id}', // Substitua por nome da conta, se disponível.
+                                  'Pagador: ${bankSlip.buyerName}',
                                   style: TextStyle(color: Colors.grey.shade700),
                                 ),
                               ],

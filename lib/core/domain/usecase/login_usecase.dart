@@ -22,8 +22,9 @@ class LoginUseCase {
         'expirationDate', response.expirationDate.toIso8601String());
 
     // Buscar o tenant principal
-    final mainTenant = response.userData.tenants
-        .firstWhere((tenant) => tenant.userIsMain == true);
+    final mainTenant = response.userData.tenants.firstWhere(
+        (tenant) => tenant.userIsMain == true,
+        orElse: () => response.userData.tenants.first);
 
     // Salvar informações do tenant principal
     await prefs.setString('pk', response.userData.pk);

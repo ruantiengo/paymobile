@@ -1,6 +1,7 @@
 import 'package:pay/core/data/models/bank_slip.model.dart';
 import 'package:pay/core/data/provider/api_provider.dart';
 import 'package:pay/config/env.dart';
+import 'package:pay/core/domain/entity/statistics_entity.dart';
 
 class BankSlipProvider {
   final ApiProvider _apiProvider;
@@ -13,6 +14,16 @@ class BankSlipProvider {
     if (response.containsKey('data')) {
       final List<dynamic> data = response['data'];
       return data.map((json) => BankSlipModel.fromJson(json)).toList();
+    }
+    throw Exception('Unexpected response format');
+  }
+
+  Future<Statistics> getMonthStatistics() async {
+    final response = await _apiProvider.get('/cbaservice/statistics');
+
+    if (response.containsKey('approved')) {
+      final stats = Statistics.fromJson(response);
+      return stats;
     }
     throw Exception('Unexpected response format');
   }

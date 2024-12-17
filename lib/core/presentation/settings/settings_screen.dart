@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:pay/core/presentation/screens/login/authenticated_navigation.dart';
+import 'package:pay/core/presentation/screens/login/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
@@ -24,10 +25,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadTenants() async {
     final prefs = await SharedPreferences.getInstance();
     final tenantsJson = prefs.getString('tenants');
+
     if (tenantsJson != null) {
       setState(() {
         tenants = jsonDecode(tenantsJson);
       });
+    }
+    if (tenants.isEmpty) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
     }
   }
 
@@ -50,25 +60,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final selectedTenant =
         tenants.firstWhere((tenant) => tenant['tenantId'] == tenantId);
 
-    // Mostrar animação de carregamento
     _showLoadingDialog();
 
-    // Simular tempo para processamento (exemplo)
     await Future.delayed(const Duration(seconds: 2));
 
-    // Atualizar SharedPreferences
     await prefs.setString('pk', selectedTenant['pk']);
     await prefs.setString('tenant_id', tenantId);
 
-    // Atualizar estado local
     setState(() {
       selectedTenantId = tenantId;
     });
 
-    // Fechar o dialog de carregamento
     Navigator.pop(context);
 
-    // Navegar para a próxima tela com animação
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
@@ -119,6 +123,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         centerTitle: true,
       ),
       body: tenants.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: Text('Error'))
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -213,6 +226,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ],
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _logout,
+                      child: const Text('Logout'),
                     ),
                   ),
                 ],
