@@ -72,7 +72,6 @@ class _AuthenticatedNavigationState extends State<AuthenticatedNavigation> {
                 child: Container(
                   height: 60,
                   decoration: BoxDecoration(
-                    // Ajuste a cor e opacidade conforme sua identidade visual
                     color: backgroundColor,
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [

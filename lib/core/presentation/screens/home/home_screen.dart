@@ -105,12 +105,15 @@ class HomeScreen extends StatelessWidget {
                                       (statistics.pending +
                                           statistics.approvedTotal)) *
                                   100;
-                              return Text(
-                                "${paymentRate.toStringAsFixed(2)}%",
-                                style: TextStyle(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.lightBlueAccent,
+                              return FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  "${paymentRate.toStringAsFixed(2)}%",
+                                  style: TextStyle(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.lightBlueAccent,
+                                  ),
                                 ),
                               );
                             }
@@ -254,20 +257,25 @@ class HomeScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
-            color: Colors.white70,
+        Flexible(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: Colors.white70,
+            ),
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        Flexible(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.right,
           ),
         ),
       ],
@@ -278,16 +286,21 @@ class HomeScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+        Flexible(
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+          ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: highlight ? Colors.red : Colors.black,
+        Flexible(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: highlight ? Colors.red : Colors.black,
+            ),
+            textAlign: TextAlign.right,
           ),
         ),
       ],
@@ -348,30 +361,36 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                method['label'] as String,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
+              Flexible(
+                child: Text(
+                  method['label'] as String,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                "Boletos: ${method['count']}",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
+              Flexible(
+                child: Text(
+                  "Boletos: ${method['count']}",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                "Total: ${method['total']}",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.blueGrey,
+              Flexible(
+                child: Text(
+                  "Total: ${method['total']}",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.blueGrey,
+                  ),
                 ),
               ),
             ],

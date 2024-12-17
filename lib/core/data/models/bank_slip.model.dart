@@ -31,7 +31,7 @@ class BankSlipModel {
       erpId: json['erp_id'],
       status: json['status'],
       branchId: json['branch_id'],
-      total: json['total'].toDouble(),
+      total: json['total']?.toDouble() ?? 0,
       buyerName: json['buyer_name'],
       buyerDocument: json['buyer_document'],
       dueDate: DateTime.parse(json['due_date']),

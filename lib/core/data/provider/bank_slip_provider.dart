@@ -8,9 +8,9 @@ class BankSlipProvider {
 
   BankSlipProvider() : _apiProvider = ApiProvider(AppConfig.apiBaseUrl);
 
-  Future<List<BankSlipModel>> getBankSlips() async {
+  Future<List<BankSlipModel>> getBankSlips(num page) async {
     final response = await _apiProvider.get(
-        '/cbaservice/bank-slip/list?page=1&limit=25&order=DESC&order_by=erp_id');
+        '/cbaservice/bank-slip/list?page=${page}&limit=25&order=DESC&order_by=erp_id');
     if (response.containsKey('data')) {
       final List<dynamic> data = response['data'];
       return data.map((json) => BankSlipModel.fromJson(json)).toList();

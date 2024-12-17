@@ -6,7 +6,7 @@ class BankSlipUseCase {
 
   BankSlipUseCase(this.repository);
 
-  Future<List<BankSlipModel>> call() async {
-    return await repository.getBankSlips();
+  Future<List<BankSlipModel>> call(num page) async {
+    return await repository.getBankSlips(page);
   }
 }

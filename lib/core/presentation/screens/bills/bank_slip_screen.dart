@@ -2,19 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pay/core/data/models/branch_model.dart';
 import 'package:pay/core/presentation/screens/bills/bank_slip_bloc.dart';
+import 'package:pay/core/presentation/screens/bills/bank_slip_detail_screen.dart';
 import 'package:pay/core/presentation/screens/bills/bank_slip_event.dart';
 import 'package:pay/core/presentation/screens/bills/bank_slip_state.dart';
 import 'package:pay/core/presentation/screens/bills/branch/branch_bloc.dart';
 import 'package:pay/core/presentation/screens/bills/branch/branch_state.dart';
-
 import 'package:pay/utils/colors.dart';
+import 'package:pay/utils/format.dart';
 
-class BankSlipScreen extends StatelessWidget {
+class BankSlipScreen extends StatefulWidget {
   const BankSlipScreen({Key? key}) : super(key: key);
+
+  @override
+  _BankSlipScreenState createState() => _BankSlipScreenState();
+}
+
+class _BankSlipScreenState extends State<BankSlipScreen> {
+  final TextEditingController _searchController = TextEditingController();
 
   String formatDateTime(String dateTime) {
     final date = DateTime.parse(dateTime);
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Ao iniciar, você pode querer carregar a primeira página
+    context.read<BankSlipBloc>().add(LoadBankSlips());
   }
 
   @override
@@ -45,6 +60,7 @@ class BankSlipScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextField(
+                    controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Buscar boletos...',
                       hintStyle: const TextStyle(color: Colors.white),
@@ -59,6 +75,7 @@ class BankSlipScreen extends StatelessWidget {
                       ),
                     ),
                     onChanged: (value) {
+                      // Ao mudar o texto, dispara o evento de busca
                       context.read<BankSlipBloc>().add(SearchBankSlips(value));
                     },
                   ),
@@ -68,26 +85,11 @@ class BankSlipScreen extends StatelessWidget {
                   hint:
                       const Text('Erpid', style: TextStyle(color: Colors.blue)),
                   items: const [
-                    // DropdownMenuItem(
-                    //   value: 'pending',
-                    //   child: Text('Pendentes',
-                    //       style: TextStyle(color: Colors.white)),
-                    // ),
-                    // DropdownMenuItem(
-                    //   value: 'paid',
-                    //   child:
-                    //       Text('Pagos', style: TextStyle(color: Colors.white)),
-                    // ),
-                    // DropdownMenuItem(
-                    //   value: '',
-                    //   child:
-                    //       Text('Todos', style: TextStyle(color: Colors.white)),
-                    // ),
+                    // Aqui você adicionaria itens do dropdown, se necessário
                   ],
                   onChanged: (value) {
-                    // context
-                    //     .read<BankSlipBloc>()
-                    //     .add(FilterBankSlipsByStatus(value!));
+                    // Lógica para filtrar por status se necessário
+                    // context.read<BankSlipBloc>().add(FilterBankSlipsByStatus(value!));
                   },
                 ),
               ],
@@ -103,7 +105,7 @@ class BankSlipScreen extends StatelessWidget {
                 if (branchState is BranchError) {
                   return Center(
                       child: Text('Erro: ${branchState.message}',
-                          style: TextStyle(color: Colors.red)));
+                          style: const TextStyle(color: Colors.red)));
                 }
 
                 if (branchState is BranchLoaded) {
@@ -118,111 +120,144 @@ class BankSlipScreen extends StatelessWidget {
                       if (state is BankSlipError) {
                         return Center(
                             child: Text('Erro: ${state.message}',
-                                style: TextStyle(color: Colors.red)));
+                                style: const TextStyle(color: Colors.red)));
                       }
 
                       if (state is BankSlipLoaded) {
+                        // Usando NotificationListener para detectar scroll até o final
                         return RefreshIndicator(
                           onRefresh: () async {
+                            // Recarrega a lista inicial
                             context.read<BankSlipBloc>().add(LoadBankSlips());
                           },
-                          child: ListView.builder(
-                            itemCount: state.bankSlips.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index == state.bankSlips.length) {
-                                // Adiciona um espaço extra ao final da lista
-                                return const SizedBox(height: 100);
+                          child: NotificationListener<ScrollNotification>(
+                            onNotification: (scrollNotification) {
+                              // Quando a rolagem chegar no final, tenta carregar a próxima página
+                              if (scrollNotification is ScrollEndNotification &&
+                                  scrollNotification.metrics.pixels ==
+                                      scrollNotification
+                                          .metrics.maxScrollExtent) {
+                                // Dispara evento para carregar mais boletos
+                                context
+                                    .read<BankSlipBloc>()
+                                    .add(LoadNextBankSlipsPage());
                               }
-                              final bankSlip = state.bankSlips[index];
-                              final branch = branches.firstWhere(
+                              return false;
+                            },
+                            child: ListView.builder(
+                              itemCount: state.bankSlips.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index == state.bankSlips.length) {
+                                  // Espaço ao final (ou indicador de loading da próxima página)
+                                  // Se quiser, pode colocar um indicador de progresso
+                                  return const Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Center(
+                                        child: CircularProgressIndicator()),
+                                  );
+                                }
+
+                                final bankSlip = state.bankSlips[index];
+                                final branch = branches.firstWhere(
                                   (branch) => branch.id == bankSlip.branchId,
                                   orElse: () => BranchModel(
                                       id: 'Desconhecido',
-                                      commercialName: 'Desconhecido'));
+                                      commercialName: 'Desconhecido'),
+                                );
 
-                              return Container(
-                                margin: const EdgeInsets.symmetric(
-                                    vertical: 8, horizontal: 16),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color:
-                                      const Color.fromARGB(255, 255, 255, 255),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.1),
-                                      spreadRadius: 2,
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 12, horizontal: 16),
-                                  title: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'ID: ${bankSlip.erpId}',
-                                        style: TextStyle(
-                                          color: Colors.blue.shade900,
-                                          fontWeight: FontWeight.bold,
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 8, horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: const Color.fromARGB(
+                                        255, 255, 255, 255),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.1),
+                                        spreadRadius: 2,
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ListTile(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                BankSlipDetailScreen(
+                                              bankSlip: bankSlip,
+                                              branch: branch,
+                                            ),
+                                          ));
+                                    },
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        vertical: 12, horizontal: 16),
+                                    title: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'ID: ${bankSlip.erpId}',
+                                          style: TextStyle(
+                                            color: Colors.blue.shade900,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      Icon(
-                                        bankSlip.status == "pending"
-                                            ? Icons.hourglass_empty
-                                            : bankSlip.status == "paid"
-                                                ? Icons.check_circle
-                                                : bankSlip.status == "cancelled"
-                                                    ? Icons.cancel
-                                                    : bankSlip.status ==
-                                                            "expired"
-                                                        ? Icons.error
-                                                        : Icons.error_outline,
-                                        color: bankSlip.status == "pending"
-                                            ? Colors.orange
-                                            : bankSlip.status == "paid"
-                                                ? Colors.green
-                                                : bankSlip.status == "cancelled"
-                                                    ? Colors.red
-                                                    : bankSlip.status ==
-                                                            "expired"
-                                                        ? Colors.grey
-                                                        : Colors.red,
-                                      ),
-                                    ],
+                                        Icon(
+                                          bankSlip.status == "pending"
+                                              ? Icons.hourglass_empty
+                                              : bankSlip.status == "paid"
+                                                  ? Icons.check_circle
+                                                  : bankSlip.status ==
+                                                          "cancelled"
+                                                      ? Icons.cancel
+                                                      : bankSlip.status ==
+                                                              "expired"
+                                                          ? Icons.error
+                                                          : Icons.error_outline,
+                                          color: bankSlip.status == "pending"
+                                              ? Colors.orange
+                                              : bankSlip.status == "paid"
+                                                  ? Colors.green
+                                                  : bankSlip.status ==
+                                                          "cancelled"
+                                                      ? Colors.red
+                                                      : bankSlip.status ==
+                                                              "expired"
+                                                          ? Colors.grey
+                                                          : Colors.red,
+                                        ),
+                                      ],
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Valor: ${formatToBRL(bankSlip.total)}',
+                                          style: const TextStyle(
+                                              color: Colors.black87),
+                                        ),
+                                        Text(
+                                          'Data de Emissão: ${formatDateTime(bankSlip.expeditionDate.toString())}',
+                                          style: TextStyle(
+                                              color: Colors.grey.shade700),
+                                        ),
+                                        Text(
+                                          'Filial: ${branch.commercialName}',
+                                          style: TextStyle(
+                                              color: Colors.grey.shade700),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        'Valor: R\$ ${bankSlip.total.toStringAsFixed(2)}',
-                                        style: TextStyle(color: Colors.black87),
-                                      ),
-                                      Text(
-                                        'Data de Emissão: ${formatDateTime(bankSlip.expeditionDate.toString())}',
-                                        style: TextStyle(
-                                            color: Colors.grey.shade700),
-                                      ),
-                                      Text(
-                                        'Conta: ${bankSlip.id}', // Substitua por nome da conta, se disponível.
-                                        style: TextStyle(
-                                            color: Colors.grey.shade700),
-                                      ),
-                                      Text(
-                                        'Filial: ${branch.commercialName}',
-                                        style: TextStyle(
-                                            color: Colors.grey.shade700),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
                         );
                       }

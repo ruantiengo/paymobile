@@ -8,8 +8,8 @@ class BankSlipRepository {
   BankSlipRepository({BankSlipProvider? provider})
       : _provider = provider ?? BankSlipProvider();
 
-  Future<List<BankSlipModel>> getBankSlips() async {
-    final bankSlipModels = await _provider.getBankSlips();
+  Future<List<BankSlipModel>> getBankSlips(num page) async {
+    final bankSlipModels = await _provider.getBankSlips(page);
 
     return bankSlipModels;
   }
