@@ -113,22 +113,22 @@ class LoginScreen extends StatelessWidget {
                           },
                         ),
                         const SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: GestureDetector(
-                            onTap: () {
-                              // Esqueceu a senha
-                            },
-                            child: Text(
-                              "Esqueci minha senha",
-                              style: TextStyle(
-                                color: Colors.blueAccent,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
+                        // Align(
+                        //   alignment: Alignment.centerRight,
+                        //   child: GestureDetector(
+                        //     onTap: () {
+                        //       // Esqueceu a senha
+                        //     },
+                        //     child: Text(
+                        //       "Esqueci minha senha",
+                        //       style: TextStyle(
+                        //         color: Colors.blueAccent,
+                        //         fontSize: 14,
+                        //         fontWeight: FontWeight.w600,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
                         const SizedBox(height: 30),
                         BlocConsumer<LoginBloc, LoginState>(
                           listener: (context, state) {

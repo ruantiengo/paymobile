@@ -42,7 +42,7 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Resumo de Boletos",
+                          "Resumo de Cobranças",
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -160,14 +160,14 @@ class HomeScreen extends StatelessWidget {
                                 return Column(
                                   children: [
                                     _buildStatItem(
-                                        "Total de Boletos Gerados",
+                                        "Total de Cobranças  Geradas",
                                         formatToBrl(statistics.pending +
                                             statistics.approvedTotal)),
                                     const Divider(),
-                                    _buildStatItem("Boletos Pagos",
+                                    _buildStatItem("Cobranças Pagas",
                                         formatToBrl(statistics.approvedTotal)),
                                     const Divider(),
-                                    _buildStatItem("Boletos Cancelados",
+                                    _buildStatItem("Cobranças Canceladas",
                                         formatToBrl(statistics.cancelled)),
                                     const Divider(),
                                     _buildStatItem("Percentual de Atrasados",
@@ -374,7 +374,7 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Flexible(
                 child: Text(
-                  "Boletos: ${method['count']}",
+                  "Cobranças: ${method['count']}",
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,

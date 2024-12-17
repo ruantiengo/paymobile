@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 String formatToBRL(double value) {
   final currencyFormat = NumberFormat.currency(
-    locale: 'pt_BR', // Define o locale como Brasil
+    locale: 'pt_BR',
     symbol: 'R\$',
   );
   return currencyFormat.format(value);

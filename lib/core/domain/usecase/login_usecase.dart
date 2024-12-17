@@ -12,31 +12,25 @@ class LoginUseCase {
   Future<AuthEntity> call(String email, String password) async {
     final response = await authRepository.login(email, password);
 
-    // Instância do SharedPreferences
     final prefs = await SharedPreferences.getInstance();
 
-    // Salvar tokens e datas
     await prefs.setString('token', response.token);
     await prefs.setString('refreshToken', response.refreshToken);
     await prefs.setString(
         'expirationDate', response.expirationDate.toIso8601String());
 
-    // Buscar o tenant principal
     final mainTenant = response.userData.tenants.firstWhere(
         (tenant) => tenant.userIsMain == true,
         orElse: () => response.userData.tenants.first);
 
-    // Salvar informações do tenant principal
     await prefs.setString('pk', response.userData.pk);
     await prefs.setString('tenant_id', mainTenant.tenantId);
 
-    // Serializar e salvar a lista de tenants como JSON
     var tenants =
         response.userData.tenants.map((tenant) => tenant.toJson()).toList();
     String tenantsJson = jsonEncode(tenants);
-    await prefs.setString('tenants', tenantsJson); // Corrigido aqui
+    await prefs.setString('tenants', tenantsJson);
 
-    // Retornar entidade AuthEntity
     return AuthEntity(
       token: response.token,
       refreshToken: response.refreshToken,

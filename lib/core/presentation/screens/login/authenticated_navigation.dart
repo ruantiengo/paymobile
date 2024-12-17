@@ -52,14 +52,10 @@ class _AuthenticatedNavigationState extends State<AuthenticatedNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Permite que o conteúdo ocupe todo o espaço, inclusive sob a área da bottom bar
       extendBody: true,
       body: Stack(
         children: [
-          // Tela principal
           _screens[_selectedIndex],
-
-          // Bottom bar personalizada
           Positioned(
             left: 20,
             right: 20,
@@ -67,7 +63,6 @@ class _AuthenticatedNavigationState extends State<AuthenticatedNavigation> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(30),
               child: BackdropFilter(
-                // Efeito blur no fundo (opcional)
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
                   height: 60,
@@ -86,7 +81,7 @@ class _AuthenticatedNavigationState extends State<AuthenticatedNavigation> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _buildNavItem(Icons.dashboard, 'Início', 0),
-                      _buildNavItem(Icons.receipt, 'Boletos', 1),
+                      _buildNavItem(Icons.receipt, 'Cobranças', 1),
                       _buildNavItem(Icons.account_balance, 'Contas', 2),
                       _buildNavItem(Icons.settings, 'Configurações', 3),
                     ],

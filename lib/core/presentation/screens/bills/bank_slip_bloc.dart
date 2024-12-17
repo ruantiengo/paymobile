@@ -7,10 +7,8 @@ import 'bank_slip_state.dart';
 class BankSlipBloc extends Bloc<BankSlipEvent, BankSlipState> {
   final BankSlipUseCase useCase;
 
-  // Lista completa de boletos carregados até o momento
   List<BankSlipModel> allBankSlips = [];
 
-  // Controle de paginação
   int currentPage = 1;
   bool hasMore = true;
 
@@ -20,8 +18,7 @@ class BankSlipBloc extends Bloc<BankSlipEvent, BankSlipState> {
       try {
         currentPage = 1;
         hasMore = true;
-        final bankSlips = await useCase.call(
-            currentPage); // Assumindo que sua useCase agora suporta paginação
+        final bankSlips = await useCase.call(currentPage);
         allBankSlips = bankSlips;
         if (bankSlips.isEmpty) {
           hasMore = false;
@@ -33,12 +30,11 @@ class BankSlipBloc extends Bloc<BankSlipEvent, BankSlipState> {
     });
 
     on<LoadNextBankSlipsPage>((event, emit) async {
-      // Só carrega se ainda houver mais
       if (!hasMore) return;
 
       try {
         currentPage++;
-        final newBankSlips = await useCase.call(currentPage); // Próxima página
+        final newBankSlips = await useCase.call(currentPage);
         if (newBankSlips.isEmpty) {
           hasMore = false;
         } else {
@@ -46,7 +42,6 @@ class BankSlipBloc extends Bloc<BankSlipEvent, BankSlipState> {
         }
         emit(BankSlipLoaded(allBankSlips));
       } catch (error) {
-        // Se der erro, podemos emitir um erro, ou voltar o currentPage
         currentPage--;
         emit(BankSlipError(error.toString()));
       }

@@ -28,7 +28,6 @@ class _BankSlipScreenState extends State<BankSlipScreen> {
   @override
   void initState() {
     super.initState();
-    // Ao iniciar, você pode querer carregar a primeira página
     context.read<BankSlipBloc>().add(LoadBankSlips());
   }
 
@@ -46,7 +45,7 @@ class _BankSlipScreenState extends State<BankSlipScreen> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Text(
-            'Boletos Bancários',
+            'Contas a Receber',
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -62,7 +61,7 @@ class _BankSlipScreenState extends State<BankSlipScreen> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Buscar boletos...',
+                      hintText: 'Buscar faturas...',
                       hintStyle: const TextStyle(color: Colors.white),
                       prefixIcon: const Icon(Icons.search, color: Colors.white),
                       border: OutlineInputBorder(
@@ -75,7 +74,6 @@ class _BankSlipScreenState extends State<BankSlipScreen> {
                       ),
                     ),
                     onChanged: (value) {
-                      // Ao mudar o texto, dispara o evento de busca
                       context.read<BankSlipBloc>().add(SearchBankSlips(value));
                     },
                   ),
@@ -84,13 +82,8 @@ class _BankSlipScreenState extends State<BankSlipScreen> {
                 DropdownButton<String>(
                   hint:
                       const Text('Erpid', style: TextStyle(color: Colors.blue)),
-                  items: const [
-                    // Aqui você adicionaria itens do dropdown, se necessário
-                  ],
-                  onChanged: (value) {
-                    // Lógica para filtrar por status se necessário
-                    // context.read<BankSlipBloc>().add(FilterBankSlipsByStatus(value!));
-                  },
+                  items: const [],
+                  onChanged: (value) {},
                 ),
               ],
             ),
@@ -124,20 +117,16 @@ class _BankSlipScreenState extends State<BankSlipScreen> {
                       }
 
                       if (state is BankSlipLoaded) {
-                        // Usando NotificationListener para detectar scroll até o final
                         return RefreshIndicator(
                           onRefresh: () async {
-                            // Recarrega a lista inicial
                             context.read<BankSlipBloc>().add(LoadBankSlips());
                           },
                           child: NotificationListener<ScrollNotification>(
                             onNotification: (scrollNotification) {
-                              // Quando a rolagem chegar no final, tenta carregar a próxima página
                               if (scrollNotification is ScrollEndNotification &&
                                   scrollNotification.metrics.pixels ==
                                       scrollNotification
                                           .metrics.maxScrollExtent) {
-                                // Dispara evento para carregar mais boletos
                                 context
                                     .read<BankSlipBloc>()
                                     .add(LoadNextBankSlipsPage());
@@ -148,8 +137,6 @@ class _BankSlipScreenState extends State<BankSlipScreen> {
                               itemCount: state.bankSlips.length + 1,
                               itemBuilder: (context, index) {
                                 if (index == state.bankSlips.length) {
-                                  // Espaço ao final (ou indicador de loading da próxima página)
-                                  // Se quiser, pode colocar um indicador de progresso
                                   return const Padding(
                                     padding: EdgeInsets.all(16.0),
                                     child: Center(
@@ -264,7 +251,7 @@ class _BankSlipScreenState extends State<BankSlipScreen> {
 
                       return const Center(
                         child: Text(
-                          'Nenhum boleto disponível',
+                          'Nenhuma fatura disponível',
                           style: TextStyle(color: Colors.white),
                         ),
                       );

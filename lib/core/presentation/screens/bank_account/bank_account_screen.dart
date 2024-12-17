@@ -80,11 +80,9 @@ class BankAccountScreen extends StatelessWidget {
                       context.read<BankAccountBloc>().add(LoadBankAccounts());
                     },
                     child: ListView.builder(
-                      itemCount:
-                          state.accounts.length + 1, // Adiciona um item extra
+                      itemCount: state.accounts.length + 1,
                       itemBuilder: (context, index) {
                         if (index == state.accounts.length) {
-                          // Adiciona o SizedBox no final da lista
                           return const SizedBox(height: 100);
                         }
 

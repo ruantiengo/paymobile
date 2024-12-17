@@ -36,7 +36,6 @@ class BranchProvider {
           .map((json) => BranchModel.fromJson(json as Map<String, dynamic>))
           .toList();
 
-      // Cache the response
       prefs.setString(cacheKey, json.encode(response));
       prefs.setInt(cacheKeyTime, DateTime.now().millisecondsSinceEpoch);
 

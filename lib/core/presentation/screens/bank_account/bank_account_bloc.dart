@@ -1,4 +1,3 @@
-// bank_account_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pay/core/domain/entity/bank_account_entity.dart';
 import 'package:pay/core/domain/usecase/bank_account_usecase.dart';

@@ -1,4 +1,3 @@
-// bank_account_usecase.dart
 import 'package:pay/core/data/repository/bank_account_repository.dart';
 import 'package:pay/core/domain/entity/bank_account_entity.dart';
 

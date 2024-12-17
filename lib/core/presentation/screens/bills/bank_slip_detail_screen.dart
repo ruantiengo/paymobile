@@ -68,18 +68,17 @@ class BankSlipDetailScreen extends StatelessWidget {
       });
       if (response.statusCode == 200) {
         final tempDir = await getTemporaryDirectory();
-        final pdfPath = '${tempDir.path}/boleto_${bankSlip.id}.pdf';
+        final pdfPath = '${tempDir.path}/fatura_${bankSlip.id}.pdf';
         final file = File(pdfPath);
         await file.writeAsBytes(response.bodyBytes);
 
-        // Aqui usamos shareFiles, mas encapsulado em uma função chamada _sharePdfFile (sua função "share_pdf")
         await Share.shareXFiles(
           [XFile(pdfPath)],
-          text: 'Compartilhando PDF do boleto ${bankSlip.erpId}',
+          text: 'Compartilhando PDF da cobrança ${bankSlip.erpId}',
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Falha ao obter o PDF do boleto')),
+          const SnackBar(content: Text('Falha ao obter o PDF da fatura')),
         );
       }
     } catch (e) {
@@ -91,7 +90,6 @@ class BankSlipDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Definições de estilo
     final titleStyle = const TextStyle(
         fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white);
     final subTitleStyle = const TextStyle(fontSize: 16, color: Colors.white70);
@@ -103,14 +101,13 @@ class BankSlipDetailScreen extends StatelessWidget {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Detalhes do Boleto',
+        title: const Text('Detalhes da fatura',
             style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: Stack(
         children: [
-          // Fundo com gradiente
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -126,11 +123,10 @@ class BankSlipDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Cabeçalho do boleto
                   Center(
                     child: Column(
                       children: [
-                        Text('Boleto: ${bankSlip.erpId}', style: titleStyle),
+                        Text('Fatura: ${bankSlip.erpId}', style: titleStyle),
                         const SizedBox(height: 4),
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -144,8 +140,6 @@ class BankSlipDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Card com informações do boleto
                   Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -156,7 +150,8 @@ class BankSlipDetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Informações do Boleto', style: cardTitleStyle),
+                          Text('Informações de cobranças',
+                              style: cardTitleStyle),
                           const Divider(),
                           ListTile(
                             leading: const Icon(Icons.attach_money,
@@ -212,7 +207,7 @@ class BankSlipDetailScreen extends StatelessWidget {
                           ListTile(
                             leading: const Icon(Icons.account_balance_wallet,
                                 color: Colors.brown),
-                            title: Text('ID Interno do Boleto',
+                            title: Text('ID Interno da fatura',
                                 style: cardTitleStyle),
                             subtitle:
                                 Text(bankSlip.id, style: cardContentStyle),
@@ -222,8 +217,6 @@ class BankSlipDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Card com informações da filial
                   Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -256,15 +249,25 @@ class BankSlipDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Botão de compartilhar PDF
                   if (bankSlip.status == "pending" ||
                       bankSlip.status == "overdue")
                     Center(
                       child: ElevatedButton.icon(
-                        onPressed: () => _sharePdf(context),
+                        onPressed: () async {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                          );
+                          await _sharePdf(context);
+                          Navigator.of(context).pop();
+                        },
                         icon: const Icon(Icons.share),
-                        label: const Text('Compartilhar PDF do Boleto'),
+                        label: const Text('Compartilhar PDF da fatura'),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 12),
