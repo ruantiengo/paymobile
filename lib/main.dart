@@ -6,12 +6,15 @@ import 'package:pay/core/data/provider/bank_slip_provider.dart';
 import 'package:pay/core/data/repository/auth_repository.dart';
 import 'package:pay/core/data/repository/bank_account_repository.dart';
 import 'package:pay/core/data/repository/bank_slip_repository.dart';
+import 'package:pay/core/data/repository/branch_repository.dart';
 import 'package:pay/core/domain/usecase/bank_account_usecase.dart';
 import 'package:pay/core/domain/usecase/bank_slip_usecase.dart';
+import 'package:pay/core/domain/usecase/branch_usecase.dart';
 import 'package:pay/core/domain/usecase/login_usecase.dart';
 import 'package:pay/core/domain/usecase/statistics_usecase.dart';
 import 'package:pay/core/presentation/screens/bank_account/bank_account_bloc.dart';
 import 'package:pay/core/presentation/screens/bills/bank_slip_bloc.dart';
+import 'package:pay/core/presentation/screens/bills/branch/branch_bloc.dart';
 import 'package:pay/core/presentation/screens/home/home_bloc.dart';
 import 'package:pay/core/presentation/screens/login/authenticated_navigation.dart';
 import 'package:pay/core/presentation/screens/login/login_bloc.dart';
@@ -49,11 +52,16 @@ void main() async {
   final statsUsecase = StatisticsUsecase(bankSlipRepository);
   final statisticBloc = StatisticBloc(statsUsecase);
 
+  final branchRepository = BranchRepository();
+  final branchUseCase = BranchUseCase(branchRepository);
+  final branchBloc = BranchBloc(branchUseCase);
+
   runApp(MyApp(
     loginBloc: loginBloc,
     bankAccountBloc: bankAccountBloc,
     bankSlipBloc: bankSlipBloc,
     statisticBloc: statisticBloc,
+    branchBloc: branchBloc,
     initialRoute: isTokenValid ? '/home' : '/',
   ));
 }
@@ -80,6 +88,7 @@ class MyApp extends StatelessWidget {
   final BankAccountBloc bankAccountBloc;
   final BankSlipBloc bankSlipBloc;
   final StatisticBloc statisticBloc;
+  final BranchBloc branchBloc;
   final String initialRoute;
   const MyApp({
     super.key,
@@ -88,6 +97,7 @@ class MyApp extends StatelessWidget {
     required this.initialRoute,
     required this.bankSlipBloc,
     required this.statisticBloc,
+    required this.branchBloc,
   });
 
   @override
@@ -98,6 +108,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<BankAccountBloc>(create: (_) => bankAccountBloc),
         BlocProvider<BankSlipBloc>(create: (_) => bankSlipBloc),
         BlocProvider<StatisticBloc>(create: (_) => statisticBloc),
+        BlocProvider<BranchBloc>(create: (_) => branchBloc),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

@@ -32,7 +32,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
-  flutter_launcher_icons: ^0.14.2
   http: ^1.2.2
   intl: ^0.20.1
   shared_preferences: ^2.3.3
@@ -51,10 +50,6 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
-flutter_icons:
-  android: true
-  ios: true
-  image_path: "assets/icon/app_icon.png"
   
 # The following section is specific to Flutter packages.
 flutter:

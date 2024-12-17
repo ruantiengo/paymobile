@@ -6,6 +6,8 @@ import 'package:pay/core/presentation/screens/bank_account/bank_account_screen.d
 import 'package:pay/core/presentation/screens/bills/bank_slip_bloc.dart';
 import 'package:pay/core/presentation/screens/bills/bank_slip_event.dart';
 import 'package:pay/core/presentation/screens/bills/bank_slip_screen.dart';
+import 'package:pay/core/presentation/screens/bills/branch/branch_bloc.dart';
+import 'package:pay/core/presentation/screens/bills/branch/branch_event.dart';
 import 'package:pay/core/presentation/screens/home/home_screen.dart';
 import 'package:pay/core/presentation/settings/settings_screen.dart';
 import 'package:pay/core/presentation/screens/bank_account/bank_account_bloc.dart';
@@ -38,9 +40,11 @@ class _AuthenticatedNavigationState extends State<AuthenticatedNavigation> {
 
     if (index == 1) {
       context.read<BankSlipBloc>().add(LoadBankSlips());
+      context.read<BranchBloc>().add(LoadBranches());
     }
     if (index == 2 && !_hasLoadedBankAccounts) {
       context.read<BankAccountBloc>().add(LoadBankAccounts());
+
       _hasLoadedBankAccounts = true;
     }
   }

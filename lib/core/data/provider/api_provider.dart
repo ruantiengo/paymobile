@@ -31,8 +31,7 @@ class ApiProvider {
     }
   }
 
-  Future<Map<String, dynamic>> get(String endpoint,
-      {Map<String, String>? headers}) async {
+  Future<dynamic> get(String endpoint, {Map<String, String>? headers}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     final pk = prefs.getString('pk');

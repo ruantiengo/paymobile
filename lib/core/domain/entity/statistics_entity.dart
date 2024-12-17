@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class Statistics {
   final double approvedTotal;
   final PaymentMethodStatistics paymentMethodStatistics;

@@ -24,21 +24,6 @@ class BankAccountScreen extends StatelessWidget {
             style: TextStyle(color: Colors.white),
           ),
         ),
-        actions: [
-          // ElevatedButton.icon(
-          //   icon: const Icon(Icons.add, color: Colors.white),
-          //   label: const Text('Nova Conta Bancária',
-          //       style: TextStyle(color: Colors.white)),
-          //   onPressed: () {
-          //     context.read<BankAccountBloc>().add(LoadBankAccounts());
-          //   },
-          //   style: ElevatedButton.styleFrom(
-          //     backgroundColor: Colors.blue.shade700,
-          //     foregroundColor: Colors.white,
-          //   ),
-          // ),
-          // const SizedBox(width: 16),
-        ],
       ),
       body: Column(
         children: [
@@ -85,7 +70,7 @@ class BankAccountScreen extends StatelessWidget {
                 }
 
                 if (state is BankAccountError) {
-                  return Center(
+                  return const Center(
                       child: Text('Erro', style: TextStyle(color: Colors.red)));
                 }
 
@@ -95,8 +80,14 @@ class BankAccountScreen extends StatelessWidget {
                       context.read<BankAccountBloc>().add(LoadBankAccounts());
                     },
                     child: ListView.builder(
-                      itemCount: state.accounts.length,
+                      itemCount:
+                          state.accounts.length + 1, // Adiciona um item extra
                       itemBuilder: (context, index) {
+                        if (index == state.accounts.length) {
+                          // Adiciona o SizedBox no final da lista
+                          return const SizedBox(height: 100);
+                        }
+
                         final account = state.accounts[index];
                         return Card(
                           margin: const EdgeInsets.symmetric(
@@ -118,8 +109,11 @@ class BankAccountScreen extends StatelessWidget {
                 }
 
                 return const Center(
-                    child: Text('Lista de contas vazias',
-                        style: TextStyle(color: Colors.blue)));
+                  child: Text(
+                    'Lista de contas vazias',
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                );
               },
             ),
           ),
