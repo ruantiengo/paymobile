@@ -6,6 +6,7 @@ import 'package:pay/core/presentation/screens/home/home_state.dart';
 import 'package:pay/utils/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -41,13 +42,35 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Resumo de Cobranças",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                // Avatar do usuário
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: SvgPicture.asset(
+                                    'assets/images/Avatar.svg',
+                                    height: 32,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Nome do Usuário',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SvgPicture.asset(
+                              'assets/images/4pay.svg',
+                              height: 32,
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 20),
                         Container(
@@ -59,31 +82,33 @@ class HomeScreen extends StatelessWidget {
                           child: BlocBuilder<StatisticBloc, StatisticsState>(
                             builder: (context, state) {
                               if (state is StatisticsLoading) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
+                                return const AnimatedStatisticsContainer(
+                                  isLoading: true,
+                                  pending: 0,
+                                  approvedTotal: 0,
+                                );
                               }
+
                               if (state is StatisticsLoaded) {
                                 final statistics = state.statistics;
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildValueRow("Valor em aberto",
-                                        formatToBrl(statistics.pending)),
-                                    const SizedBox(height: 16),
-                                    _buildValueRow("Total Recebido",
-                                        formatToBrl(statistics.approvedTotal)),
-                                  ],
+                                return AnimatedStatisticsContainer(
+                                  pending: statistics.pending,
+                                  approvedTotal: statistics.approvedTotal,
                                 );
                               }
+
                               if (state is StatisticsError) {
-                                return Center(
-                                  child: Text(
-                                    'Erro: ${state.message}',
-                                    style: TextStyle(color: Colors.red),
-                                  ),
+                                return AnimatedStatisticsContainer(
+                                  errorMessage: state.message,
+                                  pending: 0,
+                                  approvedTotal: 0,
                                 );
                               }
-                              return Container();
+
+                              return const AnimatedStatisticsContainer(
+                                pending: 0,
+                                approvedTotal: 0,
+                              );
                             },
                           ),
                         ),
@@ -101,23 +126,19 @@ class HomeScreen extends StatelessWidget {
                           builder: (context, state) {
                             if (state is StatisticsLoaded) {
                               final statistics = state.statistics;
-                              final paymentRate = (statistics.approvedTotal /
-                                      (statistics.pending +
-                                          statistics.approvedTotal)) *
-                                  100;
-                              return FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  "${paymentRate.toStringAsFixed(2)}%",
-                                  style: TextStyle(
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.lightBlueAccent,
-                                  ),
-                                ),
+                              return AnimatedPaymentRate(
+                                approvedTotal: statistics.approvedTotal,
+                                pending: statistics.pending,
                               );
                             }
-                            return Container();
+                            return const Text(
+                              "0.00%",
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white70,
+                              ),
+                            );
                           },
                         ),
                       ],
@@ -152,33 +173,41 @@ class HomeScreen extends StatelessWidget {
                             builder: (context, state) {
                               if (state is StatisticsLoading) {
                                 return const Center(
-                                    heightFactor: 6,
                                     child: CircularProgressIndicator());
                               }
                               if (state is StatisticsLoaded) {
                                 final statistics = state.statistics;
-                                return Column(
-                                  children: [
-                                    _buildStatItem(
-                                        "Total de Cobranças  Geradas",
-                                        formatToBrl(statistics.pending +
-                                            statistics.approvedTotal)),
-                                    const Divider(),
-                                    _buildStatItem("Cobranças Pagas",
-                                        formatToBrl(statistics.approvedTotal)),
-                                    const Divider(),
-                                    _buildStatItem("Cobranças Canceladas",
-                                        formatToBrl(statistics.cancelled)),
-                                    const Divider(),
-                                    _buildStatItem("Percentual de Atrasados",
-                                        "${(statistics.expired / (statistics.pending + statistics.approvedTotal) * 100).toStringAsFixed(2)}%",
-                                        highlight: true),
-                                    const Divider(),
-                                    _buildStatItem(
-                                        "Média de Atraso no Pagamento",
-                                        "${(statistics.expired / statistics.approvedTotal).toStringAsFixed(2)} dias"),
-                                  ],
-                                );
+                                final stats = [
+                                  {
+                                    'label': "Total de Cobranças",
+                                    'value': statistics.pending +
+                                        statistics.approvedTotal,
+                                  },
+                                  {
+                                    'label': "Cobranças Pagas",
+                                    'value': statistics.approvedTotal,
+                                  },
+                                  {
+                                    'label': "Cobranças Canceladas",
+                                    'value': statistics.cancelled,
+                                  },
+                                  {
+                                    'label': "Percentual de Atrasados",
+                                    'value': (statistics.expired /
+                                            (statistics.pending +
+                                                statistics.approvedTotal)) *
+                                        100,
+                                    'suffix': '%',
+                                    'highlight': true,
+                                  },
+                                  {
+                                    'label': "Média de Atraso no Pagamento",
+                                    'value': statistics.expired /
+                                        statistics.approvedTotal,
+                                    'suffix': ' dias',
+                                  },
+                                ];
+                                return AnimatedStatsGroup(stats: stats);
                               }
                               return Container();
                             },
@@ -251,60 +280,6 @@ class HomeScreen extends StatelessWidget {
   String formatToBrl(double value) {
     final format = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     return format.format(value);
-  }
-
-  Widget _buildValueRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Flexible(
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: Colors.white70,
-            ),
-          ),
-        ),
-        Flexible(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            textAlign: TextAlign.right,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatItem(String title, String value, {bool highlight = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Flexible(
-          child: Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
-          ),
-        ),
-        Flexible(
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: highlight ? Colors.red : Colors.black,
-            ),
-            textAlign: TextAlign.right,
-          ),
-        ),
-      ],
-    );
   }
 
   Widget _buildPaymentStatistics(StatisticsLoaded state) {
@@ -398,5 +373,197 @@ class HomeScreen extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class AnimatedStatsGroup extends StatelessWidget {
+  final List<Map<String, dynamic>> stats;
+
+  const AnimatedStatsGroup({Key? key, required this.stats}) : super(key: key);
+
+  String formatToBrl(double value) {
+    final format = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    return format.format(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: stats.length,
+      itemBuilder: (context, index) {
+        final stat = stats[index];
+        return TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: stat['value']),
+          duration: const Duration(seconds: 2),
+          builder: (context, animatedValue, child) {
+            // Use formatToBrl para valores monetários
+            final formattedValue = stat['suffix'] == null
+                ? formatToBrl(animatedValue)
+                : "${animatedValue.toStringAsFixed(2)}${stat['suffix']}";
+
+            return _buildStatItem(
+              stat['label'],
+              formattedValue,
+              highlight: stat['highlight'] ?? false,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildStatItem(String title, String value, {bool highlight = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+          ),
+        ),
+        Flexible(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: highlight ? Colors.red : Colors.black,
+            ),
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ],
+    );
+  }
+}
+class AnimatedPaymentRate extends StatelessWidget {
+  final double approvedTotal;
+  final double pending;
+
+  const AnimatedPaymentRate({
+    Key? key,
+    required this.approvedTotal,
+    required this.pending,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final paymentRate = (approvedTotal / (pending + approvedTotal)) * 100;
+
+    Color determineColor(double rate) {
+      if (rate > 60) return Colors.lightGreenAccent;
+      if (rate > 40) return Colors.amberAccent;
+      return Colors.redAccent;
+    }
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: paymentRate),
+      duration: const Duration(seconds: 2),
+      builder: (context, animatedValue, child) {
+        return FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            "${animatedValue.toStringAsFixed(2)}%",
+            style: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+              color: determineColor(animatedValue),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class AnimatedStatisticsContainer extends StatelessWidget {
+  final double pending;
+  final double approvedTotal;
+  final bool isLoading;
+  final String? errorMessage;
+
+  const AnimatedStatisticsContainer({
+    Key? key,
+    required this.pending,
+    required this.approvedTotal,
+    this.isLoading = false,
+    this.errorMessage,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (errorMessage != null) {
+      return Center(
+        child: Text(
+          'Erro: $errorMessage',
+          style: const TextStyle(color: Colors.red),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildAnimatedValueRow(
+            "Valor em aberto",
+            pending,
+          ),
+          const SizedBox(height: 16),
+          _buildAnimatedValueRow(
+            "Total Recebido",
+            approvedTotal,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnimatedValueRow(String label, double value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.white70,
+          ),
+        ),
+        TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: value),
+          duration: const Duration(seconds: 2),
+          builder: (context, animatedValue, child) {
+            return Text(
+              formatToBrl(animatedValue),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  String formatToBrl(double value) {
+    final format = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    return format.format(value);
   }
 }
