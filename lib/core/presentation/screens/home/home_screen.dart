@@ -103,28 +103,13 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(height: 20),
                         Container(
                           padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                          decoration: BoxDecoration(
-                            color: backgroundColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              "Bem vindo",
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),
+                          child: const Text(
+                            "Taxa de Pagamento",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white70,
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          "Taxa de Pagamento",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white70,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -166,48 +151,48 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          BlocStateHandler(
+                          BlocBuilder<StatisticBloc, StatisticsState>(
                             builder: (context, state) {
-                              final statistics =
-                                  (state as StatisticsLoaded).statistics;
-                              final stats = [
-                                {
-                                  'label': "Total de Cobranças",
-                                  'value': statistics.pending +
-                                      statistics.approvedTotal,
-                                },
-                                {
-                                  'label': "Cobranças Pagas",
-                                  'value': statistics.approvedTotal,
-                                  'color': Colors.green,
-                                },
-                                {
-                                  'label': "Cobranças Pendentes",
-                                  'value': statistics.pending,
-                                  'color': Colors.blueAccent,
-                                },
-                                {
-                                  'label': "Cobranças Expiradas",
-                                  'value': statistics.expired,
-                                  'color': Colors.redAccent,
-                                },
-                                {
-                                  'label': "Percentual de Atrasados",
-                                  'value': (statistics.expired /
-                                          (statistics.pending +
-                                              statistics.approvedTotal)) *
-                                      100,
-                                  'suffix': '%',
-                                  'highlight': true,
-                                },
-                                {
-                                  'label': "Média de Atraso no Pagamento",
-                                  'value': statistics.expired /
-                                      statistics.approvedTotal,
-                                  'suffix': ' dias',
-                                },
-                              ];
-                              return AnimatedStatsGroup(stats: stats);
+                              if (state is StatisticsLoading) {
+                                return const Center(
+                                    heightFactor: 6,
+                                    child: CircularProgressIndicator());
+                              }
+                              if (state is StatisticsLoaded) {
+                                final statistics = state.statistics;
+                                return Column(
+                                  children: [
+                                    _buildStatItem(
+                                        "Total de Cobranças  Geradas",
+                                        formatToBRL(statistics.pending +
+                                            statistics.approvedTotal)),
+                                    const Divider(),
+                                    _buildStatItem(
+                                      "Cobranças Pagas",
+                                      formatToBRL(statistics.approvedTotal),
+                                      color: Colors.green,
+                                    ),
+                                    const Divider(),
+                                    _buildStatItem("Cobranças em Aberto",
+                                        formatToBRL(statistics.pending)),
+                                    const Divider(),
+                                    _buildStatItem(
+                                      "Cobranças Canceladas",
+                                      formatToBRL(statistics.cancelled),
+                                      color: Colors.redAccent,
+                                    ),
+                                    const Divider(),
+                                    _buildStatItem("Percentual de Atrasados",
+                                        "${(statistics.expired / (statistics.pending + statistics.approvedTotal) * 100).toStringAsFixed(2)}%",
+                                        highlight: true),
+                                    const Divider(),
+                                    _buildStatItem(
+                                        "Média de Atraso no Pagamento",
+                                        "${(statistics.expired / statistics.approvedTotal).toStringAsFixed(2)} dias"),
+                                  ],
+                                );
+                              }
+                              return Container();
                             },
                           ),
                           const SizedBox(height: 30),
@@ -265,6 +250,32 @@ class HomeScreen extends StatelessWidget {
   Future<String?> _getTenantId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('tenant_id');
+  }
+
+  Widget _buildStatItem(String title, String value,
+      {bool highlight = false, Color? color}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+          ),
+        ),
+        Flexible(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color ?? (highlight ? Colors.red : Colors.black),
+            ),
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildPaymentStatistics(StatisticsLoaded state) {
@@ -359,8 +370,4 @@ class HomeScreen extends StatelessWidget {
       },
     );
   }
-}
-
-extension on Future<SharedPreferences> {
-  getString(String s) {}
 }
