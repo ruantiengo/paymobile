@@ -163,7 +163,7 @@ class HomeScreen extends StatelessWidget {
                                 return Column(
                                   children: [
                                     _buildStatItem(
-                                        "Total de Cobranças  Geradas",
+                                        "Total de Cobranças",
                                         formatToBRL(statistics.pending +
                                             statistics.approvedTotal)),
                                     const Divider(),
@@ -182,12 +182,12 @@ class HomeScreen extends StatelessWidget {
                                       color: Colors.redAccent,
                                     ),
                                     const Divider(),
-                                    _buildStatItem("Percentual de Atrasados",
+                                    _buildStatItem("Taxa de Atraso",
                                         "${(statistics.expired / (statistics.pending + statistics.approvedTotal) * 100).toStringAsFixed(2)}%",
                                         highlight: true),
                                     const Divider(),
                                     _buildStatItem(
-                                        "Média de Atraso no Pagamento",
+                                        "Média de Atraso",
                                         "${(statistics.expired / statistics.approvedTotal).toStringAsFixed(2)} dias"),
                                   ],
                                 );
