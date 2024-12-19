@@ -9,7 +9,6 @@ import 'package:pay/utils/format.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -28,11 +27,17 @@ class HomeScreen extends StatelessWidget {
               return Center(child: Text('Erro: ${snapshot.error}'));
             }
             final tenantId = snapshot.data;
+
             if (tenantId == null) {
               return const Center(child: Text('Tenant ID não encontrado'));
             }
 
             context.read<StatisticBloc>().add(LoadMonthStatistics());
+
+            Future<String?> getUserName() async {
+              final prefs = await SharedPreferences.getInstance();
+              return prefs.getString('name');
+            }
 
             return SingleChildScrollView(
               child: Column(
@@ -58,13 +63,34 @@ class HomeScreen extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(width: 12),
-                                Text(
-                                  'Nome do Usuário',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+
+                                FutureBuilder<String?>(
+                                  future: getUserName(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const CircularProgressIndicator();
+                                    }
+                                    if (snapshot.hasError ||
+                                        !snapshot.hasData) {
+                                      return const Text(
+                                        "Nome não encontrado",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      );
+                                    }
+                                    return Text(
+                                      snapshot.data!,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    );
+                                  },
                                 ),
                               ],
                             ),
@@ -76,21 +102,20 @@ class HomeScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                           decoration: BoxDecoration(
                             color: backgroundColor,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: BlocStateHandler(
-                            builder: (context, state) {
-                              final statistics =
-                                  (state as StatisticsLoaded).statistics;
-
-                              return AnimatedStatisticsContainer(
-                                pending: statistics.pending,
-                                approvedTotal: statistics.approvedTotal,
-                              );
-                            },
+                          child: const Center(
+                            child: Text(
+                              "Bem vindo",
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -154,10 +179,17 @@ class HomeScreen extends StatelessWidget {
                                 {
                                   'label': "Cobranças Pagas",
                                   'value': statistics.approvedTotal,
+                                  'color': Colors.green,
                                 },
                                 {
-                                  'label': "Cobranças Canceladas",
-                                  'value': statistics.cancelled,
+                                  'label': "Cobranças Pendentes",
+                                  'value': statistics.pending,
+                                  'color': Colors.blueAccent,
+                                },
+                                {
+                                  'label': "Cobranças Expiradas",
+                                  'value': statistics.expired,
+                                  'color': Colors.redAccent,
                                 },
                                 {
                                   'label': "Percentual de Atrasados",
@@ -280,7 +312,7 @@ class HomeScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withAlpha((0.1 * 255).toInt()),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -329,3 +361,6 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+extension on Future<SharedPreferences> {
+  getString(String s) {}
+}

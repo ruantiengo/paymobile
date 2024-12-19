@@ -18,6 +18,7 @@ class LoginUseCase {
     await prefs.setString('refreshToken', response.refreshToken);
     await prefs.setString(
         'expirationDate', response.expirationDate.toIso8601String());
+    
 
     final mainTenant = response.userData.tenants.firstWhere(
         (tenant) => tenant.userIsMain == true,
@@ -25,6 +26,7 @@ class LoginUseCase {
 
     await prefs.setString('pk', response.userData.pk);
     await prefs.setString('tenant_id', mainTenant.tenantId);
+    await prefs.setString('name', response.userData.name);
 
     var tenants =
         response.userData.tenants.map((tenant) => tenant.toJson()).toList();

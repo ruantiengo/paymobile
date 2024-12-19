@@ -28,6 +28,7 @@ class AnimatedStatsGroup extends StatelessWidget {
               stat['label'],
               formattedValue,
               highlight: stat['highlight'] ?? false,
+              color: stat['color'],
             );
           },
         );
@@ -35,7 +36,7 @@ class AnimatedStatsGroup extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String title, String value, {bool highlight = false}) {
+  Widget _buildStatItem(String title, String value, {bool highlight = false, Color? color}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -51,7 +52,7 @@ class AnimatedStatsGroup extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: highlight ? Colors.red : Colors.black,
+              color: highlight ? Colors.red : color ?? Colors.black,
             ),
             textAlign: TextAlign.right,
           ),
